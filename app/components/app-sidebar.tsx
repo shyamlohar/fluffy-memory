@@ -14,6 +14,7 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from "~/components/ui/sidebar"
+import { useLoaderData, useRouteLoaderData } from "react-router"
 
 // This is sample data.
 const data = {

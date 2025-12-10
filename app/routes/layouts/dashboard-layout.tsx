@@ -1,22 +1,22 @@
-import { AppSidebar } from "~/components/app-sidebar"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "~/components/ui/breadcrumb"
-import { Separator } from "~/components/ui/separator"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "~/components/ui/sidebar"
+import { Outlet } from "react-router";
+import { Separator } from "@radix-ui/react-separator";
+import { AppSidebar } from "~/components/app-sidebar";
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "~/components/ui/breadcrumb";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "~/components/ui/sidebar";
+import type { Route } from "./+types/dashboard-layout";
 
-export default function Page() {
-  return (
-    <SidebarProvider>
+export async function clientLoader({
+  params,
+}: Route.ClientLoaderArgs) {
+  const product = {test: 1};
+  return product;
+}
+
+export default function DashboardLayout({loaderData}: Route.ComponentProps) {
+    const data = loaderData;
+
+    console.log(data.test)
+    return <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b">
@@ -38,15 +38,9 @@ export default function Page() {
             </Breadcrumb>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-          </div>
-          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
+        <div className="gap-4 p-4 h-[calc(100vh-calc(var(--spacing)*16))] overflow-auto">
+          <Outlet />
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
 }
