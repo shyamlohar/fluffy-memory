@@ -38,7 +38,7 @@ export default function DashboardLayout({loaderData}: Route.ComponentProps) {
             </Breadcrumb>
           </div>
         </header>
-        <div className="gap-4 p-4 h-[calc(100vh-calc(var(--spacing)*16))] overflow-auto">
+        <div className="gap-4 h-[calc(100vh-calc(var(--spacing)*16))] overflow-auto">
           <Outlet />
         </div>
       </SidebarInset>

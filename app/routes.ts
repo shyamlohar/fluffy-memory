@@ -7,6 +7,7 @@ import {
 export default [
   layout("routes/layouts/dashboard-layout.tsx", [
     route("/", "routes/home.tsx"),
+    route("/query/new", "routes/query/new.tsx"),
     route("/query/:id", "routes/query/id.tsx"),
   ]),
 ] satisfies RouteConfig;
