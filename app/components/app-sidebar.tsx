@@ -1,7 +1,7 @@
 import { PlayIcon } from "lucide-react"
 import * as React from "react"
 
-import { Link } from "react-router"
+import { Link, useMatch } from "react-router"
 import {
   Sidebar,
   SidebarContent,
@@ -164,6 +164,9 @@ export async function clientLoader() {
 }
 
 export function AppSidebar({ queries, ...props }: React.ComponentProps<typeof Sidebar> & { queries: QueryType }) {
+  const match = useMatch("/query/:id")
+  const activeId = match?.params.id ? Number(match.params.id) : null
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -185,15 +188,18 @@ export function AppSidebar({ queries, ...props }: React.ComponentProps<typeof Si
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>
-            {queries.map((query) => (
-              <SidebarMenuItem key={query.id}>
-                <SidebarMenuButton asChild>
-                  <Link to={`/query/${query.id}`} className="font-medium">
-                    {query.name}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+            {queries.map((query) => {
+              const isActive = activeId === query.id
+              return (
+                <SidebarMenuItem key={query.id}>
+                  <SidebarMenuButton asChild isActive={isActive}>
+                    <Link to={`/query/${query.id}`} className="font-medium">
+                      {query.name}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )
+            })}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
