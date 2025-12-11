@@ -20,7 +20,7 @@ export default function DashboardLayout({loaderData}: Route.ComponentProps) {
           <div className="flex items-center gap-2 px-3">
             <SidebarTrigger />
             <Separator orientation="vertical" className="mr-2 h-4" />
-            <Breadcrumb>
+            {/* <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink href="#">
@@ -32,7 +32,7 @@ export default function DashboardLayout({loaderData}: Route.ComponentProps) {
                   <BreadcrumbPage>Data Fetching</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
-            </Breadcrumb>
+            </Breadcrumb> */}
           </div>
         </header>
         <div className="gap-4 h-[calc(100vh-calc(var(--spacing)*16))] overflow-auto">
