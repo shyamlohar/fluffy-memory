@@ -1,6 +1,7 @@
+import { PlayIcon } from "lucide-react"
 import * as React from "react"
-import { GalleryVerticalEnd } from "lucide-react"
 
+import { Link } from "react-router"
 import {
   Sidebar,
   SidebarContent,
@@ -15,7 +16,6 @@ import {
   SidebarRail,
 } from "~/components/ui/sidebar"
 import { queriesStore, type QueryType } from "~/data/store/queries-store"
-import { Link } from "react-router"
 
 // // This is sample data.
 // const data = {
@@ -170,15 +170,14 @@ export function AppSidebar({ queries, ...props }: React.ComponentProps<typeof Si
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <Link to="/">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <GalleryVerticalEnd className="size-4" />
+                  <PlayIcon className="size-4" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-medium">Documentation</span>
-                  <span className="">v1.0.0</span>
+                  <span className="font-medium">Query Runner</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
