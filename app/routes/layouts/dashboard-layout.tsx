@@ -4,20 +4,17 @@ import { AppSidebar } from "~/components/app-sidebar";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "~/components/ui/breadcrumb";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "~/components/ui/sidebar";
 import type { Route } from "./+types/dashboard-layout";
+import { queriesStore } from "~/data/store/queries-store";
 
-export async function clientLoader({
-  params,
-}: Route.ClientLoaderArgs) {
-  const product = {test: 1};
-  return product;
+export async function clientLoader() {
+  const data = queriesStore.getQueries()
+  return data;
 }
 
 export default function DashboardLayout({loaderData}: Route.ComponentProps) {
     const data = loaderData;
-
-    console.log(data.test)
     return <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar queries={data} />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b">
           <div className="flex items-center gap-2 px-3">

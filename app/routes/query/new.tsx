@@ -1,13 +1,24 @@
+import { useRef } from "react";
 import { PlayIcon } from "lucide-react";
+import { QueryInput } from "~/components/query-input";
 import { Button } from "~/components/ui/button";
-import { Textarea } from "~/components/ui/textarea";
 
 export default function NewQuery() {
+  const queryInputRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleRun = () => {
+    const queryValue = queryInputRef.current?.value;
+    if (queryValue) {
+      console.log("Running query:", queryValue);
+      // TODO: Implement query execution logic
+    }
+  };
+
   return (
     <div className="min-h-14 border-b p-4">
-      <div className="flex items-start h-screen gap-4">
-        <Textarea placeholder="Please write your query here" className="min-h-10" rows={2} name="Query" />
-        <Button>
+      <div className="flex items-start gap-4">
+        <QueryInput ref={queryInputRef} />
+        <Button onClick={handleRun}>
           <PlayIcon />
           Run
         </Button>
