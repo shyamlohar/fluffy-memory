@@ -5,6 +5,7 @@ import {
   useContext,
   useMemo,
   useState,
+  useEffect,
 } from "react"
 import type {
   ComponentProps,
@@ -55,6 +56,12 @@ function QueryRunner({ children, initialValue = "", onRun = mockRunQuery, onSave
   const [error, setError] = useState<string | null>(null)
   const [isRunning, setIsRunning] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+
+  useEffect(() => {
+    setValue(initialValue)
+    setResult(null)
+    setError(null)
+  }, [initialValue])
 
   const run = useCallback(async () => {
     if (!value.trim()) return

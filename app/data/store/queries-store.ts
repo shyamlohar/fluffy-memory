@@ -2,7 +2,8 @@ export type QueryType = Array<{ id: number; name: string; value: string }>;
 
 class QueriesStore {
   private queries: QueryType = [
-    { id: 1, name: "Orders", value: "SELECT * from orders" },
+    { id: 1, name: "Employees", value: "SELECT * from employees" },
+    { id: 2, name: "Orders", value: "SELECT * from orders" },
   ];
 
   getQueries() {
