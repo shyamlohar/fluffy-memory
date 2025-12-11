@@ -1,18 +1,26 @@
 export type QueryType = Array<{ id: number; name: string; value: string }>;
 
 class QueriesStore {
-  private querirs: QueryType = [
+  private queries: QueryType = [
     { id: 1, name: "Orders", value: "SELECT * from orders" },
   ];
 
-  addQuery() {}
-
   getQueries() {
-    return this.querirs;
+    return this.queries;
   }
 
   getQueryById(id: number) {
-    return this.querirs.find((query) => query.id === id);
+    return this.queries.find((query) => query.id === id);
+  }
+
+  addQuery(name: string, value: string) {
+    const nextId =
+      this.queries.length > 0
+        ? Math.max(...this.queries.map((q) => q.id)) + 1
+        : 1;
+    const nextQuery = { id: nextId, name, value };
+    this.queries.push(nextQuery);
+    return nextQuery;
   }
 
   removeQuery() {}

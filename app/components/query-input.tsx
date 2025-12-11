@@ -1,15 +1,23 @@
 import { Textarea } from "~/components/ui/textarea";
 import { forwardRef } from "react";
+import type { TextareaHTMLAttributes } from "react";
 
-interface QueryInputProps {
-  defaultValue?: string;
-  placeholder?: string;
+type QueryInputProps = {
   className?: string;
   rows?: number;
-}
+} & Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "rows" | "className">;
 
 export const QueryInput = forwardRef<HTMLTextAreaElement, QueryInputProps>(
-  ({ defaultValue = "", placeholder = "Please write your query here", className = "min-h-10", rows = 2 }, ref) => {
+  (
+    {
+      defaultValue = "",
+      placeholder = "Please write your query here",
+      className = "min-h-10",
+      rows = 2,
+      ...props
+    },
+    ref
+  ) => {
     return (
       <Textarea
         ref={ref}
@@ -18,6 +26,7 @@ export const QueryInput = forwardRef<HTMLTextAreaElement, QueryInputProps>(
         rows={rows}
         name="Query"
         defaultValue={defaultValue}
+        {...props}
       />
     );
   }

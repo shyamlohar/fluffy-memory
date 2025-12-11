@@ -1,28 +1,23 @@
-import { useRef } from "react";
-import { PlayIcon } from "lucide-react";
-import { QueryInput } from "~/components/query-input";
-import { Button } from "~/components/ui/button";
+import { QueryRunner } from "~/components/query-runner";
+import { queriesStore } from "~/data/store/queries-store";
 
 export default function NewQuery() {
-  const queryInputRef = useRef<HTMLTextAreaElement>(null);
-
-  const handleRun = () => {
-    const queryValue = queryInputRef.current?.value;
-    if (queryValue) {
-      console.log("Running query:", queryValue);
-      // TODO: Implement query execution logic
-    }
+  const handleSave = async (sql: string) => {
+    const nextIndex = queriesStore.getQueries().length + 1;
+    queriesStore.addQuery(`Query ${nextIndex}`, sql);
   };
 
   return (
     <div className="min-h-14 border-b p-4">
-      <div className="flex items-start gap-4">
-        <QueryInput ref={queryInputRef} />
-        <Button onClick={handleRun}>
-          <PlayIcon />
-          Run
-        </Button>
-      </div>
+      <QueryRunner onSave={handleSave}>
+        <QueryRunner.Input rows={6} />
+        <QueryRunner.Actions>
+          <QueryRunner.RunButton />
+          <QueryRunner.SaveButton />
+        </QueryRunner.Actions>
+        <QueryRunner.Error />
+        <QueryRunner.Results />
+      </QueryRunner>
     </div>
   );
 }
