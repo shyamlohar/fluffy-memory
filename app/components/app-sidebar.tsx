@@ -1,4 +1,4 @@
-import { PlayIcon } from "lucide-react"
+import { PlayIcon, Plus } from "lucide-react"
 import * as React from "react"
 
 import { Link, useMatch } from "react-router"
@@ -15,7 +15,9 @@ import {
   // SidebarMenuSubItem,
   SidebarRail,
 } from "~/components/ui/sidebar"
+import { Input } from "~/components/ui/input"
 import { queriesStore, type QueryType } from "~/data/store/queries-store"
+import { Button } from "./ui/button"
 
 // // This is sample data.
 // const data = {
@@ -166,6 +168,13 @@ export async function clientLoader() {
 export function AppSidebar({ queries, ...props }: React.ComponentProps<typeof Sidebar> & { queries: QueryType }) {
   const match = useMatch("/query/:id")
   const activeId = match?.params.id ? Number(match.params.id) : null
+  const [search, setSearch] = React.useState("")
+
+  const filteredQueries = React.useMemo(() => {
+    const term = search.trim().toLowerCase()
+    if (!term) return queries
+    return queries.filter((q) => q.name.toLowerCase().includes(term))
+  }, [queries, search])
 
   return (
     <Sidebar {...props}>
@@ -187,8 +196,21 @@ export function AppSidebar({ queries, ...props }: React.ComponentProps<typeof Si
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
+          <div className="px-2 pb-2 flex items-center gap-2">
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search queries"
+              className="h-8"
+            />
+            <Button asChild  size="sm" className="px-2">
+              <Link to="/query/new" className="font-medium">
+                <Plus className="size-4" />
+              </Link>
+            </Button>
+          </div>
           <SidebarMenu>
-            {queries.map((query) => {
+            {filteredQueries.map((query) => {
               const isActive = activeId === query.id
               return (
                 <SidebarMenuItem key={query.id}>
