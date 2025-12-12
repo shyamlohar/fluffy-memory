@@ -1,7 +1,7 @@
 import { PlayIcon, Plus } from "lucide-react"
 import * as React from "react"
 
-import { Link, useMatch } from "react-router"
+import { Link, useMatch, useNavigate } from "react-router"
 import {
   Sidebar,
   SidebarContent,
@@ -164,6 +164,7 @@ export function AppSidebar({ queries, ...props }: React.ComponentProps<typeof Si
   const match = useMatch("/query/:id")
   const activeId = match?.params.id ? Number(match.params.id) : null
   const [search, setSearch] = React.useState("")
+  const navigate = useNavigate()
 
   const filteredQueries = React.useMemo(() => {
     const term = search.trim().toLowerCase()
@@ -198,10 +199,12 @@ export function AppSidebar({ queries, ...props }: React.ComponentProps<typeof Si
               placeholder="Search queries"
               className="h-8"
             />
-            <Button asChild  size="sm" className="px-2">
-              <Link to="/query/new" className="font-medium">
-                <Plus className="size-4" />
-              </Link>
+            <Button
+              size="sm"
+              className="px-2"
+              onClick={() => navigate(`/query/new?tab=${Date.now()}`)}
+            >
+              <Plus className="size-4" />
             </Button>
           </div>
           <SidebarMenu>
