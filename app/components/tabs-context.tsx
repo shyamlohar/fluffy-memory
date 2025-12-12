@@ -65,7 +65,7 @@ export function TabsProvider({
           const fallback = nextTabs[idx - 1] ?? nextTabs[idx] ?? null
           const nextPath = fallback?.path ?? "/"
           setActivePath(fallback ? fallback.path : null)
-          if (fallback) navigate(nextPath)
+          navigate(nextPath)
         }
 
         return nextTabs
