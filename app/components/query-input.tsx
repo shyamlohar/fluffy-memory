@@ -10,7 +10,6 @@ type QueryInputProps = {
 export const QueryInput = forwardRef<HTMLTextAreaElement, QueryInputProps>(
   (
     {
-      defaultValue = "",
       placeholder = "Please write your query here",
       className = "min-h-10",
       rows = 2,
@@ -25,7 +24,6 @@ export const QueryInput = forwardRef<HTMLTextAreaElement, QueryInputProps>(
         className={className}
         rows={rows}
         name="Query"
-        defaultValue={defaultValue}
         {...props}
       />
     );
