@@ -19,9 +19,8 @@ export default function DashboardLayout({loaderData}: Route.ComponentProps) {
       <TabsProvider queries={data}>
         <AppSidebar queries={data} />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b">
-            <div className="flex items-center gap-2 px-3 flex-1">
-              <SidebarTrigger />
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b  max-w-[calc(100vw-var(--sidebar-width))] overflow-x-auto">
+            <div className="flex items-center gap-2 px-3 flex-1">    
               <TabsBar queries={data} />
             </div>
           </header>
