@@ -25,6 +25,7 @@ type QueryRunnerProps = {
   initialValue?: string
   onRun?: (sql: string) => Promise<QueryResult>
   onSave?: (sql: string) => Promise<void> | void
+  onChangeValue?: (sql: string) => void
   savingState?: boolean
   className?: string
 }
@@ -56,6 +57,7 @@ function QueryRunner({
   initialValue = "",
   onRun = mockRunQuery,
   onSave,
+  onChangeValue,
   savingState,
   className,
 }: QueryRunnerProps) {
@@ -103,6 +105,12 @@ function QueryRunner({
       }
     }
   }, [onSave, value, savingState])
+
+  useEffect(() => {
+    if (onChangeValue) {
+      onChangeValue(value)
+    }
+  }, [value, onChangeValue])
 
   const ctxValue = useMemo<QueryRunnerContextValue>(
     () => ({
