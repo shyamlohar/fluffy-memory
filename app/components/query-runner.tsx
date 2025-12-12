@@ -25,6 +25,7 @@ type QueryRunnerProps = {
   initialValue?: string
   onRun?: (sql: string) => Promise<QueryResult>
   onSave?: (sql: string) => Promise<void> | void
+  savingState?: boolean
   className?: string
 }
 
@@ -50,12 +51,21 @@ function useQueryRunnerContext() {
   return ctx
 }
 
-function QueryRunner({ children, initialValue = "", onRun = mockRunQuery, onSave, className }: QueryRunnerProps) {
+function QueryRunner({
+  children,
+  initialValue = "",
+  onRun = mockRunQuery,
+  onSave,
+  savingState,
+  className,
+}: QueryRunnerProps) {
   const [value, setValue] = useState(initialValue)
   const [result, setResult] = useState<QueryResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isRunning, setIsRunning] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+  const [isSavingInternal, setIsSavingInternal] = useState(false)
+
+  const isSaving = savingState ?? isSavingInternal
 
   useEffect(() => {
     setValue(initialValue)
@@ -79,16 +89,20 @@ function QueryRunner({ children, initialValue = "", onRun = mockRunQuery, onSave
 
   const save = useCallback(async () => {
     if (!onSave) return
-    setIsSaving(true)
+    if (savingState === undefined) {
+      setIsSavingInternal(true)
+    }
     try {
       await onSave(value)
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save query")
     } finally {
-      setIsSaving(false)
+      if (savingState === undefined) {
+        setIsSavingInternal(false)
+      }
     }
-  }, [onSave, value])
+  }, [onSave, value, savingState])
 
   const ctxValue = useMemo<QueryRunnerContextValue>(
     () => ({

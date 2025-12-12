@@ -16,7 +16,7 @@ import {
   SidebarRail,
 } from "~/components/ui/sidebar"
 import { Input } from "~/components/ui/input"
-import { queriesStore, type QueryType } from "~/data/store/queries-store"
+import { type QueryType } from "~/data/store/queries-store"
 import { Button } from "./ui/button"
 
 // // This is sample data.
@@ -159,11 +159,6 @@ import { Button } from "./ui/button"
 //     },
 //   ],
 // }
-
-export async function clientLoader() {
-  const data = queriesStore.getQueries()
-  return data;
-}
 
 export function AppSidebar({ queries, ...props }: React.ComponentProps<typeof Sidebar> & { queries: QueryType }) {
   const match = useMatch("/query/:id")
