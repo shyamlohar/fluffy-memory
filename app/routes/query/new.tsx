@@ -1,9 +1,11 @@
 import type { Route } from "./+types/new";
 import { useEffect } from "react";
-import { useFetcher, useNavigate, useSearchParams } from "react-router";
+import { useFetcher, useNavigate, useSearchParams, useLocation } from "react-router";
 import { QueryRunner } from "~/components/query-runner";
 import { queriesStore } from "~/data/store/queries-store";
 import { draftsStore } from "~/data/store/drafts-store";
+import { useTabs } from "~/components/tabs-context";
+import { resultsStore } from "~/data/store/results-store";
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
   const formData = await request.formData();
@@ -24,21 +26,39 @@ export default function NewQuery() {
   const isSaving = fetcher.state !== "idle";
   const [searchParams] = useSearchParams();
   const tabKey = searchParams.get("tab") ?? "default";
+  const location = useLocation();
+  const { replaceTab } = useTabs();
   const initialDraft = draftsStore.get(tabKey);
+  const tabPath = `/query/new${location.search}`;
 
   useEffect(() => {
     if (fetcher.data?.id) {
+      const title = fetcher.data.name ?? `Query ${fetcher.data.id}`;
+      const nextPath = `/query/${fetcher.data.id}`;
+      const existingResult = resultsStore.get(tabPath);
+      replaceTab(tabPath, {
+        type: "query",
+        id: fetcher.data.id,
+        title,
+        path: nextPath,
+      });
       draftsStore.clear(tabKey);
-      navigate(`/query/${fetcher.data.id}`);
+      resultsStore.clear(tabPath);
+      if (existingResult) {
+        resultsStore.set(nextPath, existingResult);
+      }
+      navigate(nextPath);
     }
-  }, [fetcher.data, navigate]);
+  }, [fetcher.data, navigate, tabPath, replaceTab, tabKey]);
 
   const handleChange = (value: string) => {
     draftsStore.set(tabKey, value);
   };
 
   const handleSave = async (sql: string) => {
-    fetcher.submit({ name: "New query", value: sql }, { method: "post" });
+    const defaultName = `New Query ${queriesStore.getQueries().length + 1}`;
+    const name = window.prompt("Name this query", defaultName) || defaultName;
+    fetcher.submit({ name, value: sql }, { method: "post" });
   };
 
   return (
@@ -49,6 +69,7 @@ export default function NewQuery() {
         onChangeValue={handleChange}
         onSave={handleSave}
         savingState={isSaving}
+        tabKey={tabPath}
       >
         <QueryRunner.Input rows={6} />
         <QueryRunner.Actions>

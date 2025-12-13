@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 import type { QueryType } from "~/data/store/queries-store"
+import { resultsStore } from "~/data/store/results-store"
 
 type Tab =
   | { type: "new"; title: string; path: string }
@@ -10,6 +11,7 @@ type TabsContextValue = {
   tabs: Tab[]
   activePath: string | null
   closeTab: (path: string) => void
+  replaceTab: (oldPath: string, nextTab: Tab) => void
 }
 
 const TabsContext = createContext<TabsContextValue | null>(null)
@@ -60,6 +62,7 @@ export function TabsProvider({
         if (idx === -1) return prev
 
         const nextTabs = [...prev.slice(0, idx), ...prev.slice(idx + 1)]
+        resultsStore.clear(path)
 
         if (activePath === path) {
           const fallback = nextTabs[idx - 1] ?? nextTabs[idx] ?? null
@@ -72,6 +75,23 @@ export function TabsProvider({
       })
     },
     [activePath, navigate]
+  )
+
+  const replaceTab = useCallback(
+    (oldPath: string, nextTab: Tab) => {
+      setTabs((prev) => {
+        const idx = prev.findIndex((t) => t.path === oldPath)
+        if (idx === -1) {
+          setActivePath(nextTab.path)
+          return [...prev, nextTab]
+        }
+        const nextTabs = [...prev]
+        nextTabs[idx] = nextTab
+        setActivePath(nextTab.path)
+        return nextTabs
+      })
+    },
+    []
   )
 
   // Sync with route changes: ensure current path is in tabs and active.
@@ -94,8 +114,9 @@ export function TabsProvider({
       tabs,
       activePath,
       closeTab,
+      replaceTab,
     }),
-    [tabs, activePath, closeTab]
+    [tabs, activePath, closeTab, replaceTab]
   )
 
   return <TabsContext.Provider value={value}>{children}</TabsContext.Provider>

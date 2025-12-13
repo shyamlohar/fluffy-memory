@@ -18,6 +18,7 @@ import { Button } from "~/components/ui/button"
 import { QueryInput } from "~/components/query-input"
 import { ResultTable } from "~/components/result-table"
 import { mockRunQuery, type QueryResult } from "~/data/helpers/mock-query-runner"
+import { resultsStore } from "~/data/store/results-store"
 import { cn } from "~/lib/utils"
 
 type QueryRunnerProps = {
@@ -27,6 +28,7 @@ type QueryRunnerProps = {
   onSave?: (sql: string) => Promise<void> | void
   onChangeValue?: (sql: string) => void
   savingState?: boolean
+  tabKey?: string
   className?: string
 }
 
@@ -59,6 +61,7 @@ function QueryRunner({
   onSave,
   onChangeValue,
   savingState,
+  tabKey,
   className,
 }: QueryRunnerProps) {
   const [value, setValue] = useState(initialValue)
@@ -75,12 +78,24 @@ function QueryRunner({
     setError(null)
   }, [initialValue])
 
+  useEffect(() => {
+    if (tabKey) {
+      const stored = resultsStore.get(tabKey)
+      if (stored) {
+        setResult(stored)
+      }
+    }
+  }, [tabKey])
+
   const run = useCallback(async () => {
     if (!value.trim()) return
     setIsRunning(true)
     try {
       const next = await onRun(value)
       setResult(next)
+      if (tabKey) {
+        resultsStore.set(tabKey, next)
+      }
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to run query")

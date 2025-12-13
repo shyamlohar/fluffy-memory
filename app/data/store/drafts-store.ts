@@ -1,9 +1,6 @@
 const memoryDrafts = new Map<string, string>()
 
 export const draftsStore = {
-  init() {
-    // no-op for now; hook up storage later if needed
-  },
   get(tabKey: string) {
     return memoryDrafts.get(tabKey) ?? ""
   },
