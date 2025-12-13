@@ -26,7 +26,9 @@ function tabFromLocation(pathname: string, search: string, queries: QueryType): 
   const queryMatch = pathname.match(/^\/query\/(\d+)/)
   if (queryMatch) {
     const id = Number(queryMatch[1])
-    const title = queries.find((q) => q.id === id)?.name ?? `Query ${id}`
+    const found = queries.find((q) => q.id === id)
+    if (!found) return null
+    const title = found.name
     return { type: "query", id, title, path }
   }
 
