@@ -25,7 +25,11 @@ class QueriesStore {
     return nextQuery
   }
 
-  removeQuery() {}
+  removeQuery(id: number) {
+    const before = this.queries.length
+    this.queries = this.queries.filter((q) => q.id !== id)
+    return this.queries.length < before
+  }
 }
 
 export const queriesStore = new QueriesStore()

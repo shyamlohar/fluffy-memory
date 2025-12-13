@@ -1,4 +1,4 @@
-import { PlayIcon, Plus } from "lucide-react"
+import { PlayIcon, Plus, Trash } from "lucide-react"
 import * as React from "react"
 
 import { Link, useMatch, useNavigate } from "react-router"
@@ -16,8 +16,10 @@ import {
   SidebarRail,
 } from "~/components/ui/sidebar"
 import { Input } from "~/components/ui/input"
-import { type QueryType } from "~/data/store/queries-store"
+import { type QueryType, queriesStore } from "~/data/store/queries-store"
 import { Button } from "./ui/button"
+import { useTabs } from "./tabs-context"
+import { resultsStore } from "~/data/store/results-store"
 
 // // This is sample data.
 // const data = {
@@ -164,13 +166,33 @@ export function AppSidebar({ queries, ...props }: React.ComponentProps<typeof Si
   const match = useMatch("/query/:id")
   const activeId = match?.params.id ? Number(match.params.id) : null
   const [search, setSearch] = React.useState("")
+  const [localQueries, setLocalQueries] = React.useState(queries)
   const navigate = useNavigate()
+  const { closeTab } = useTabs()
+
+  React.useEffect(() => {
+    setLocalQueries(queries)
+  }, [queries])
 
   const filteredQueries = React.useMemo(() => {
     const term = search.trim().toLowerCase()
-    if (!term) return queries
-    return queries.filter((q) => q.name.toLowerCase().includes(term))
-  }, [queries, search])
+    if (!term) return localQueries
+    return localQueries.filter((q) => q.name.toLowerCase().includes(term))
+  }, [localQueries, search])
+
+  const handleDelete = (id: number) => {
+    const confirmed = window.confirm("Delete this query?")
+    if (!confirmed) return
+    const removed = queriesStore.removeQuery(id)
+    if (!removed) return
+    setLocalQueries((prev) => prev.filter((q) => q.id !== id))
+    const path = `/query/${id}`
+    resultsStore.clear(path)
+    closeTab(path)
+    if (activeId === id) {
+      navigate("/")
+    }
+  }
 
   return (
     <Sidebar {...props}>
@@ -212,11 +234,25 @@ export function AppSidebar({ queries, ...props }: React.ComponentProps<typeof Si
               const isActive = activeId === query.id
               return (
                 <SidebarMenuItem key={query.id}>
-                  <SidebarMenuButton asChild isActive={isActive}>
-                    <Link to={`/query/${query.id}`} className="font-medium">
-                      {query.name}
-                    </Link>
-                  </SidebarMenuButton>
+                  <div className="flex items-center justify-between gap-2">
+                    <SidebarMenuButton asChild isActive={isActive} className="flex-1">
+                      <Link to={`/query/${query.id}`} className="font-medium">
+                        {query.name}
+                      </Link>
+                    </SidebarMenuButton>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Delete query"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        handleDelete(query.id)
+                      }}
+                    >
+                      <Trash className="size-4 text-muted-foreground hover:text-destructive" />
+                    </Button>
+                  </div>
                 </SidebarMenuItem>
               )
             })}
