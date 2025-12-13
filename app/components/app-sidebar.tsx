@@ -207,7 +207,7 @@ export function AppSidebar({ queries, ...props }: React.ComponentProps<typeof Si
               <Plus className="size-4" />
             </Button>
           </div>
-          <SidebarMenu>
+          <SidebarMenu className="pt-2">
             {filteredQueries.map((query) => {
               const isActive = activeId === query.id
               return (
