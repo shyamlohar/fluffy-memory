@@ -25,6 +25,19 @@ class QueriesStore {
     return nextQuery
   }
 
+  updateQuery(id: number, data: Partial<{ name: string; value: string }>) {
+    const idx = this.queries.findIndex((q) => q.id === id)
+    if (idx === -1) return null
+    const existing = this.queries[idx]
+    const updated = {
+      ...existing,
+      ...(data.name !== undefined ? { name: data.name } : {}),
+      ...(data.value !== undefined ? { value: data.value } : {}),
+    }
+    this.queries[idx] = updated
+    return updated
+  }
+
   removeQuery(id: number) {
     const before = this.queries.length
     this.queries = this.queries.filter((q) => q.id !== id)
