@@ -4,6 +4,7 @@ class QueriesStore {
   private queries: QueryType = [
     { id: 1, name: "Employees", value: "SELECT * from employees" },
     { id: 2, name: "Orders", value: "SELECT * from orders" },
+    { id: 3, name: "Products", value: "SELECT * from products" },
   ]
 
   getQueries() {

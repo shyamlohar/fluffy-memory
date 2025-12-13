@@ -191,8 +191,8 @@ export function AppSidebar({ queries, ...props }: React.ComponentProps<typeof Si
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <div className="px-2 pb-2 flex items-center gap-2">
+        <SidebarGroup className="pt-0">
+          <div className="px-2 pb-2 flex items-center gap-2 sticky top-0 bg-sidebar z-10">
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
