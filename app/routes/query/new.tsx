@@ -77,6 +77,7 @@ export default function NewQuery() {
           <QueryRunner.SaveButton />
         </QueryRunner.Actions>
         <QueryRunner.Error />
+        <QueryRunner.Duration />
         <QueryRunner.Results />
       </QueryRunner>
     </div>

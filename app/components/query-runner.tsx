@@ -41,6 +41,7 @@ type QueryRunnerContextValue = {
   error: string | null
   isRunning: boolean
   isSaving: boolean
+  durationMs: number | null
   run: () => Promise<void>
   cancel: () => void
   save: () => Promise<void>
@@ -73,6 +74,7 @@ function QueryRunner({
   const [error, setError] = useState<string | null>(null)
   const [isRunning, setIsRunning] = useState(false)
   const [isSavingInternal, setIsSavingInternal] = useState(false)
+  const [durationMs, setDurationMs] = useState<number | null>(null)
   const runTokenRef = useRef<number | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
 
@@ -88,7 +90,8 @@ function QueryRunner({
     if (tabKey) {
       const stored = resultsStore.get(tabKey)
       if (stored) {
-        setResult(stored)
+        setResult(stored.result)
+        setDurationMs(stored.durationMs ?? null)
       }
     }
   }, [tabKey])
@@ -100,14 +103,18 @@ function QueryRunner({
     abortControllerRef.current = controller
     if (getAbortController) getAbortController()
     setIsRunning(true)
+    setDurationMs(null)
+    const start = performance.now()
     const token = Date.now()
     runTokenRef.current = token
     try {
       const next = await onRun(value, controller.signal)
       if (runTokenRef.current !== token) return
+      const elapsed = performance.now() - start
       setResult(next)
+      setDurationMs(elapsed)
       if (tabKey) {
-        resultsStore.set(tabKey, next)
+        resultsStore.set(tabKey, { result: next, durationMs: elapsed })
       }
       setError(null)
     } catch (err) {
@@ -121,6 +128,7 @@ function QueryRunner({
         setIsRunning(false)
         runTokenRef.current = null
         abortControllerRef.current = null
+        setDurationMs(performance.now() - start)
       }
     }
   }, [onRun, value, tabKey, getAbortController])
@@ -163,12 +171,13 @@ function QueryRunner({
       error,
       isRunning,
       isSaving,
+      durationMs,
       run,
       cancel,
       save,
       hasSave: Boolean(onSave),
     }),
-    [value, result, error, isRunning, isSaving, run, cancel, save, onSave]
+    [value, result, error, isRunning, isSaving, durationMs, run, cancel, save, onSave]
   )
 
   return (
@@ -228,6 +237,16 @@ function QueryRunnerResults() {
   return <ResultTable columns={result.columns} rows={result.rows} />
 }
 
+function QueryRunnerDuration({ className }: { className?: string }) {
+  const { durationMs, isRunning } = useQueryRunnerContext()
+  if (durationMs == null || isRunning) return null
+  return (
+    <div className={cn("text-xs text-muted-foreground", className)}>
+      Last run: {durationMs.toFixed(1)} ms
+    </div>
+  )
+}
+
 type QueryRunnerComponent = FC<QueryRunnerProps> & {
   Input: typeof QueryRunnerInput
   Actions: typeof QueryRunnerActions
@@ -235,6 +254,7 @@ type QueryRunnerComponent = FC<QueryRunnerProps> & {
   SaveButton: typeof QueryRunnerSaveButton
   Error: typeof QueryRunnerError
   Results: typeof QueryRunnerResults
+  Duration: typeof QueryRunnerDuration
 }
 
 const QueryRunnerCompound = QueryRunner as QueryRunnerComponent
@@ -244,6 +264,7 @@ QueryRunnerCompound.RunButton = QueryRunnerRunButton
 QueryRunnerCompound.SaveButton = QueryRunnerSaveButton
 QueryRunnerCompound.Error = QueryRunnerError
 QueryRunnerCompound.Results = QueryRunnerResults
+QueryRunnerCompound.Duration = QueryRunnerDuration
 
 export { QueryRunnerCompound as QueryRunner }
 

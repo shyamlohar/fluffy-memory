@@ -57,6 +57,7 @@ export default function QueryDetail() {
           <QueryRunner.SaveButton />
         </QueryRunner.Actions>
         <QueryRunner.Error />
+        <QueryRunner.Duration />
         <QueryRunner.Results />
       </QueryRunner>
     </div>
