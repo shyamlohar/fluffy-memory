@@ -1,4 +1,4 @@
-import { PlayIcon, Save } from "lucide-react"
+import { PlayIcon, Save, Pause } from "lucide-react"
 import {
   createContext,
   useCallback,
@@ -6,6 +6,7 @@ import {
   useMemo,
   useState,
   useEffect,
+  useRef,
 } from "react"
 import type {
   ComponentProps,
@@ -24,11 +25,12 @@ import { cn } from "~/lib/utils"
 type QueryRunnerProps = {
   children: ReactNode
   initialValue?: string
-  onRun?: (sql: string) => Promise<QueryResult>
+  onRun?: (sql: string, signal?: AbortSignal) => Promise<QueryResult>
   onSave?: (sql: string) => Promise<void> | void
   onChangeValue?: (sql: string) => void
   savingState?: boolean
   tabKey?: string
+  getAbortController?: () => AbortController
   className?: string
 }
 
@@ -40,6 +42,7 @@ type QueryRunnerContextValue = {
   isRunning: boolean
   isSaving: boolean
   run: () => Promise<void>
+  cancel: () => void
   save: () => Promise<void>
   hasSave: boolean
 }
@@ -62,6 +65,7 @@ function QueryRunner({
   onChangeValue,
   savingState,
   tabKey,
+  getAbortController,
   className,
 }: QueryRunnerProps) {
   const [value, setValue] = useState(initialValue)
@@ -69,6 +73,8 @@ function QueryRunner({
   const [error, setError] = useState<string | null>(null)
   const [isRunning, setIsRunning] = useState(false)
   const [isSavingInternal, setIsSavingInternal] = useState(false)
+  const runTokenRef = useRef<number | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   const isSaving = savingState ?? isSavingInternal
 
@@ -89,20 +95,42 @@ function QueryRunner({
 
   const run = useCallback(async () => {
     if (!value.trim()) return
+    abortControllerRef.current?.abort()
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+    if (getAbortController) getAbortController()
     setIsRunning(true)
+    const token = Date.now()
+    runTokenRef.current = token
     try {
-      const next = await onRun(value)
+      const next = await onRun(value, controller.signal)
+      if (runTokenRef.current !== token) return
       setResult(next)
       if (tabKey) {
         resultsStore.set(tabKey, next)
       }
       setError(null)
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        return
+      }
+      if (runTokenRef.current !== token) return
       setError(err instanceof Error ? err.message : "Failed to run query")
     } finally {
-      setIsRunning(false)
+      if (runTokenRef.current === token) {
+        setIsRunning(false)
+        runTokenRef.current = null
+        abortControllerRef.current = null
+      }
     }
-  }, [onRun, value])
+  }, [onRun, value, tabKey, getAbortController])
+
+  const cancel = useCallback(() => {
+    runTokenRef.current = null
+    abortControllerRef.current?.abort()
+    abortControllerRef.current = null
+    setIsRunning(false)
+  }, [])
 
   const save = useCallback(async () => {
     if (!onSave) return
@@ -136,10 +164,11 @@ function QueryRunner({
       isRunning,
       isSaving,
       run,
+      cancel,
       save,
       hasSave: Boolean(onSave),
     }),
-    [value, result, error, isRunning, isSaving, run, save, onSave]
+    [value, result, error, isRunning, isSaving, run, cancel, save, onSave]
   )
 
   return (
@@ -167,11 +196,11 @@ function QueryRunnerActions({ className, ...props }: HTMLAttributes<HTMLDivEleme
 }
 
 function QueryRunnerRunButton({ children, ...props }: ComponentProps<typeof Button>) {
-  const { run, isRunning } = useQueryRunnerContext()
+  const { run, cancel, isRunning } = useQueryRunnerContext()
   return (
-    <Button onClick={run} disabled={isRunning} {...props}>
-      <PlayIcon />
-      {children ?? (isRunning ? "Running..." : "Run")}
+    <Button onClick={isRunning ? cancel : run} variant={isRunning ? "destructive" : props.variant} {...props}>
+      {isRunning ? <Pause /> : <PlayIcon />}
+      {children ?? (isRunning ? "Cancel" : "Run")}
     </Button>
   )
 }

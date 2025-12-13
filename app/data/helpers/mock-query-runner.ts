@@ -27,14 +27,30 @@ async function loadCsvData(): Promise<QueryResult> {
   return { columns, rows }
 }
 
-export async function mockRunQuery(_sql: string): Promise<QueryResult> {
+export async function mockRunQuery(_sql: string, signal?: AbortSignal): Promise<QueryResult> {
+  if (signal?.aborted) {
+    throw new DOMException("Aborted", "AbortError")
+  }
+
   const { columns, rows } = await loadCsvData()
 
   const max = Math.min(20, rows.length)
   const count = Math.max(1, Math.floor(Math.random() * max))
   const sample = rows.slice(0, count)
 
-  await new Promise((resolve) => setTimeout(resolve, 120))
+  await new Promise((resolve, reject) => {
+    const timeout = setTimeout(resolve, 5000)
+    if (signal) {
+      signal.addEventListener(
+        "abort",
+        () => {
+          clearTimeout(timeout)
+          reject(new DOMException("Aborted", "AbortError"))
+        },
+        { once: true }
+      )
+    }
+  })
 
   return { columns, rows: sample }
 }
