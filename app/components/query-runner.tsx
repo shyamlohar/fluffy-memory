@@ -94,8 +94,13 @@ function QueryRunner({
       if (stored) {
         setResult(stored.result)
         setDurationMs(stored.durationMs ?? null)
+        return
       }
     }
+    // If no stored data for this tab, clear last state so we don't show stale info.
+    setResult(null)
+    setDurationMs(null)
+    setError(null)
   }, [tabKey])
 
   const run = useCallback(async () => {
@@ -134,7 +139,6 @@ function QueryRunner({
         setIsRunning(false)
         runTokenRef.current = null
         abortControllerRef.current = null
-        setDurationMs(performance.now() - start)
       }
     }
   }, [onRun, value, tabKey, getAbortController])

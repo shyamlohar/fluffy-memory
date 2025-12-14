@@ -1,4 +1,8 @@
+import { storageService } from "~/lib/storage-service"
+
 export type QueryType = Array<{ id: number; name: string; value: string }>
+
+const STORAGE_KEY = "qr:queries"
 
 class QueriesStore {
   private queries: QueryType = [
@@ -6,6 +10,21 @@ class QueriesStore {
     { id: 2, name: "Orders", value: "SELECT * from orders" },
     { id: 3, name: "Products", value: "SELECT * from products" },
   ]
+
+  constructor() {
+    this.hydrate()
+  }
+
+  private hydrate() {
+    const parsed = storageService.get<QueryType>(STORAGE_KEY)
+    if (parsed && Array.isArray(parsed)) {
+      this.queries = parsed
+    }
+  }
+
+  private persist() {
+    storageService.set(STORAGE_KEY, this.queries)
+  }
 
   getQueries() {
     return this.queries
@@ -22,6 +41,7 @@ class QueriesStore {
         : 1
     const nextQuery = { id: nextId, name, value }
     this.queries.push(nextQuery)
+    this.persist()
     return nextQuery
   }
 
@@ -35,13 +55,16 @@ class QueriesStore {
       ...(data.value !== undefined ? { value: data.value } : {}),
     }
     this.queries[idx] = updated
+    this.persist()
     return updated
   }
 
   removeQuery(id: number) {
     const before = this.queries.length
     this.queries = this.queries.filter((q) => q.id !== id)
-    return this.queries.length < before
+    const removed = this.queries.length < before
+    if (removed) this.persist()
+    return removed
   }
 }
 

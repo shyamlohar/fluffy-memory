@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 import type { QueryType } from "~/data/store/queries-store"
 import { resultsStore } from "~/data/store/results-store"
+import { tabsStore, type StoredTab } from "~/data/store/tabs-store"
 
 type Tab =
   | { type: "new"; title: string; path: string }
@@ -48,13 +49,21 @@ export function TabsProvider({
   const navigate = useNavigate()
   const [searchParams,] = useSearchParams();
   const tabKey = searchParams.get("tab");
+  const hydrateTabs = useCallback((): { tabs: Tab[]; active: string | null } => {
+    const stored = tabsStore.loadWithQueries(queries)
+    return { tabs: stored.tabs as Tab[], active: stored.active }
+  }, [queries])
+
+  const initialFromRoute = tabFromLocation(location.pathname, location.search, queries)
+  const hydrated = hydrateTabs()
+
   const [tabs, setTabs] = useState<Tab[]>(() => {
-    const initial = tabFromLocation(location.pathname, location.search, queries)
-    return initial ? [initial] : []
+    if (hydrated.tabs.length) return hydrated.tabs
+    return initialFromRoute ? [initialFromRoute] : []
   })
   const [activePath, setActivePath] = useState<string | null>(() => {
-    const initial = tabFromLocation(location.pathname, location.search, queries)
-    return initial?.path ?? null
+    if (hydrated.active) return hydrated.active
+    return initialFromRoute?.path ?? null
   })
 
   
@@ -127,6 +136,11 @@ export function TabsProvider({
       return [...prev, nextTab]
     })
   }, [location.pathname, location.search, queries])
+
+  useEffect(() => {
+    tabsStore.saveTabs(tabs as StoredTab[])
+    tabsStore.saveActive(activePath)
+  }, [tabs, activePath])
 
   const value = useMemo(
     () => ({
