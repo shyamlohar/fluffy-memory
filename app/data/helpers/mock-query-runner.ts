@@ -39,7 +39,7 @@ export async function mockRunQuery(_sql: string, signal?: AbortSignal): Promise<
   const sample = rows.slice(0, count)
 
   await new Promise((resolve, reject) => {
-    const timeout = setTimeout(resolve, 5000)
+    const timeout = setTimeout(resolve, 50)
     if (signal) {
       signal.addEventListener(
         "abort",
@@ -51,6 +51,11 @@ export async function mockRunQuery(_sql: string, signal?: AbortSignal): Promise<
       )
     }
   })
+
+  // Simulate occasional failure (~20%).
+  if (Math.random() < 0.2) {
+    throw new Error("Query execution failed. Please try again.")
+  }
 
   return { columns, rows: sample }
 }

@@ -43,6 +43,7 @@ type QueryRunnerContextValue = {
   isSaving: boolean
   durationMs: number | null
   run: () => Promise<void>
+  retry: () => Promise<void>
   cancel: () => void
   save: () => Promise<void>
   hasSave: boolean
@@ -123,6 +124,10 @@ function QueryRunner({
       }
       if (runTokenRef.current !== token) return
       setError(err instanceof Error ? err.message : "Failed to run query")
+      setResult(null)
+      if (tabKey) {
+        resultsStore.set(tabKey, null)
+      }
     } finally {
       if (runTokenRef.current === token) {
         setIsRunning(false)
@@ -139,6 +144,11 @@ function QueryRunner({
     abortControllerRef.current = null
     setIsRunning(false)
   }, [])
+
+  const retry = useCallback(async () => {
+    setError(null)
+    await run()
+  }, [run])
 
   const save = useCallback(async () => {
     if (!onSave) return
@@ -173,11 +183,12 @@ function QueryRunner({
       isSaving,
       durationMs,
       run,
+      retry,
       cancel,
       save,
       hasSave: Boolean(onSave),
     }),
-    [value, result, error, isRunning, isSaving, durationMs, run, cancel, save, onSave]
+    [value, result, error, isRunning, isSaving, durationMs, run, retry, cancel, save, onSave]
   )
 
   return (
@@ -226,15 +237,38 @@ function QueryRunnerSaveButton({ children, ...props }: ComponentProps<typeof But
 }
 
 function QueryRunnerError({ className }: { className?: string }) {
-  const { error } = useQueryRunnerContext()
+  const { error, retry, isRunning } = useQueryRunnerContext()
   if (!error) return null
-  return <div className={cn("text-destructive text-sm", className)}>{error}</div>
+  return (
+    <div
+      className={cn(
+        "min-h-48 flex flex-col items-center justify-center gap-2 rounded-md border border-destructive/40 bg-destructive/5 text-sm text-destructive",
+        className
+      )}
+    >
+      <div>{error}</div>
+      <Button variant="outline" size="sm" onClick={retry} disabled={isRunning}>
+        Retry
+      </Button>
+    </div>
+  )
 }
 
 function QueryRunnerResults() {
   const { result } = useQueryRunnerContext()
   if (!result) return null
   return <ResultTable columns={result.columns} rows={result.rows} />
+}
+
+function QueryRunnerOutput() {
+  const { error, result } = useQueryRunnerContext()
+  if (error) {
+    return <QueryRunnerError />
+  }
+  if (result) {
+    return <QueryRunnerResults />
+  }
+  return null
 }
 
 function QueryRunnerDuration({ className }: { className?: string }) {
@@ -254,6 +288,7 @@ type QueryRunnerComponent = FC<QueryRunnerProps> & {
   SaveButton: typeof QueryRunnerSaveButton
   Error: typeof QueryRunnerError
   Results: typeof QueryRunnerResults
+  Output: typeof QueryRunnerOutput
   Duration: typeof QueryRunnerDuration
 }
 
@@ -264,6 +299,7 @@ QueryRunnerCompound.RunButton = QueryRunnerRunButton
 QueryRunnerCompound.SaveButton = QueryRunnerSaveButton
 QueryRunnerCompound.Error = QueryRunnerError
 QueryRunnerCompound.Results = QueryRunnerResults
+QueryRunnerCompound.Output = QueryRunnerOutput
 QueryRunnerCompound.Duration = QueryRunnerDuration
 
 export { QueryRunnerCompound as QueryRunner }
