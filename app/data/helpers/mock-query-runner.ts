@@ -52,8 +52,15 @@ export async function mockRunQuery(_sql: string, signal?: AbortSignal): Promise<
     }
   })
 
-  // Simulate occasional failure (~20%).
-  if (Math.random() < 0.2) {
+  // Simulate failure if toggled in localStorage.
+  // NOTE: this is just for demonstration purposes. 
+  // hardcoding key is just to keep it simple.
+  let shouldFail = false
+  if (typeof window !== "undefined") {
+    const flag = window.localStorage.getItem("qr:mock-fail")
+    shouldFail = flag === "true"
+  }
+  if (shouldFail) {
     throw new Error("Query execution failed. Please try again.")
   }
 
