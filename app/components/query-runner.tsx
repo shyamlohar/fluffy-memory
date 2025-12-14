@@ -224,9 +224,15 @@ function QueryRunnerActions({ className, ...props }: HTMLAttributes<HTMLDivEleme
 }
 
 function QueryRunnerRunButton({ children, ...props }: ComponentProps<typeof Button>) {
-  const { run, cancel, isRunning } = useQueryRunnerContext()
+  const { run, cancel, isRunning, value } = useQueryRunnerContext()
+  const hasQuery = value.trim().length > 0
   return (
-    <Button onClick={isRunning ? cancel : run} variant={isRunning ? "destructive" : props.variant} {...props}>
+    <Button
+      onClick={isRunning ? cancel : run}
+      variant={isRunning ? "destructive" : props.variant}
+      disabled={props.disabled ?? (!hasQuery || isRunning)}
+      {...props}
+    >
       {isRunning ? <Pause /> : <PlayIcon />}
       {children ?? (isRunning ? "Cancel" : "Run")}
     </Button>
