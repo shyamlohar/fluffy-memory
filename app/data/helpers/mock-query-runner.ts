@@ -34,8 +34,8 @@ export async function mockRunQuery(_sql: string, signal?: AbortSignal): Promise<
 
   const { columns, rows } = await loadCsvData()
 
-  const max = Math.min(20, rows.length)
-  const count = Math.max(1, Math.floor(Math.random() * max))
+  const max = Math.min(100, rows.length)
+  const count = Math.max(200, Math.floor(Math.random() * max))
   const sample = rows.slice(0, count)
 
   await new Promise((resolve, reject) => {
