@@ -24,6 +24,8 @@ export function useShortcuts({ enabled = true }: ShortcutOptions = {}) {
           target.tagName === "TEXTAREA" ||
           target.getAttribute("contenteditable") === "true")
 
+      if (isFormElement) return
+
       // Run (Cmd/Ctrl + Shift + R)
       if (meta && shift && event.key.toLowerCase() === "r") {
         event.preventDefault()
@@ -62,13 +64,9 @@ export function useShortcuts({ enabled = true }: ShortcutOptions = {}) {
           cmd.cancel()
         }
       }
-
-      // Avoid interfering with form typing for other keys.
-      if (isFormElement) return
     }
 
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
   }, [enabled, newTab, closeActive])
 }
-
