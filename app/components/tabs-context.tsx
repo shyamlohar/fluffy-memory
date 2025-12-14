@@ -12,6 +12,8 @@ type TabsContextValue = {
   activePath: string | null
   closeTab: (path: string) => void
   replaceTab: (oldPath: string, nextTab: Tab) => void
+  newTab: () => void
+  closeActive: () => void
 }
 
 const TabsContext = createContext<TabsContextValue | null>(null)
@@ -96,6 +98,21 @@ export function TabsProvider({
     []
   )
 
+  const newTab = useCallback(() => {
+    const path = `/query/new?tab=${Date.now()}`
+    navigate(path)
+    setActivePath(path)
+    setTabs((prev) => {
+      if (prev.find((t) => t.path === path)) return prev
+      return [...prev, { type: "new", title: "New query", path }]
+    })
+  }, [navigate])
+
+  const closeActive = useCallback(() => {
+    if (!activePath) return
+    closeTab(activePath)
+  }, [activePath, closeTab])
+
   // Sync with route changes: ensure current path is in tabs and active.
   useEffect(() => {
     const nextTab = tabFromLocation(location.pathname, location.search, queries)
@@ -109,7 +126,7 @@ export function TabsProvider({
       if (exists) return prev
       return [...prev, nextTab]
     })
-  }, [location.pathname, queries, tabKey])
+  }, [location.pathname, location.search, queries])
 
   const value = useMemo(
     () => ({
@@ -117,8 +134,10 @@ export function TabsProvider({
       activePath,
       closeTab,
       replaceTab,
+      newTab,
+      closeActive,
     }),
-    [tabs, activePath, closeTab, replaceTab]
+    [tabs, activePath, closeTab, replaceTab, newTab, closeActive]
   )
 
   return <TabsContext.Provider value={value}>{children}</TabsContext.Provider>

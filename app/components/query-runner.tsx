@@ -20,6 +20,7 @@ import { QueryInput } from "~/components/query-input"
 import { ResultTable } from "~/components/result-table"
 import { mockRunQuery, type QueryResult } from "~/data/helpers/mock-query-runner"
 import { resultsStore } from "~/data/store/results-store"
+import { runnerCommandsStore } from "~/data/store/runner-commands"
 import { cn } from "~/lib/utils"
 
 type QueryRunnerProps = {
@@ -172,6 +173,13 @@ function QueryRunner({
       onChangeValue(value)
     }
   }, [value, onChangeValue])
+
+  useEffect(() => {
+    runnerCommandsStore.set({ run, save, cancel })
+    return () => {
+      runnerCommandsStore.set(null)
+    }
+  }, [run, save, cancel])
 
   const ctxValue = useMemo<QueryRunnerContextValue>(
     () => ({

@@ -7,6 +7,13 @@ import type { Route } from "./+types/dashboard-layout";
 import { queriesStore } from "~/data/store/queries-store";
 import { TabsProvider } from "~/components/tabs-context";
 import { TabsBar } from "~/components/tabs-bar";
+import { useShortcuts } from "~/hooks/use-shortcuts";
+import { ShortcutsHelp } from "~/components/shortcuts-help";
+
+function ShortcutsProvider({ children }: { children: React.ReactNode }) {
+  useShortcuts();
+  return children;
+}
 
 export async function clientLoader() {
   const data = queriesStore.getQueries()
@@ -17,17 +24,20 @@ export default function DashboardLayout({loaderData}: Route.ComponentProps) {
     const data = loaderData;
     return <SidebarProvider>
       <TabsProvider queries={data}>
-        <AppSidebar queries={data} />
-        <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b  max-w-[calc(100vw-var(--sidebar-width))] overflow-x-auto">
-            <div className="flex items-center gap-2 px-3 flex-1">    
-              <TabsBar queries={data} />
+        <ShortcutsProvider>
+          <AppSidebar queries={data} />
+          <SidebarInset>
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b  max-w-[calc(100vw-var(--sidebar-width))] overflow-x-auto">
+              <div className="flex items-center gap-2 px-3 flex-1">    
+                <TabsBar queries={data} />
+              </div>
+            </header>
+            <div className="gap-4 h-[calc(100vh-calc(var(--spacing)*16))] overflow-auto">
+              <Outlet />
             </div>
-          </header>
-          <div className="gap-4 h-[calc(100vh-calc(var(--spacing)*16))] overflow-auto">
-            <Outlet />
-          </div>
-        </SidebarInset>
+            <ShortcutsHelp />
+          </SidebarInset>
+        </ShortcutsProvider>
       </TabsProvider>
     </SidebarProvider>
 }
