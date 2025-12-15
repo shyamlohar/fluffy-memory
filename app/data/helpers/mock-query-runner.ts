@@ -39,7 +39,7 @@ export async function mockRunQuery(_sql: string, signal?: AbortSignal): Promise<
   const sample = rows.slice(0, count)
 
   await new Promise((resolve, reject) => {
-    const timeout = setTimeout(resolve, 50)
+    const timeout = setTimeout(resolve, 3000)
     if (signal) {
       signal.addEventListener(
         "abort",
