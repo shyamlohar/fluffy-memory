@@ -1,87 +1,122 @@
-# Welcome to React Router!
+# SQL Query testing tool
 
-A modern, production-ready template for building full-stack React applications using React Router.
+Walkthrough video: 
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+[https://www.loom.com/share/5d6a972e563940ca9cf28552f2ebe08e](https://www.loom.com/share/5d6a972e563940ca9cf28552f2ebe08e)
 
-## Features
+## Problem Statement & Design Rationale
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+### Functional Requirements
 
-## Getting Started
+- Include space to write query and button to execute said query
+- Render the result / failure of queried data
+- Cancellation of triggered queries
+- Time spent on execution of query
+- Save Queries
+- Delete Queries
+- Rename Queries
 
-### Installation
+### Non Functional Requirements
 
-Install the dependencies:
+- Syntax highlighting
+- Query validation
+- Autocomplete for query
+- Responsive UI
+- Ability to store query and its result to view previous data offline.
+- Ability to transform the queried result to render result data in certain way. e.g base64 values can be rendered as image
+- AI support to explain query in natural language and transforming it into SQL query
+- Download query result as CSV
+- Bookmark Queries / PIN queries
+- Directories for saved queries
 
-```bash
-npm install
-```
+### **Tech Stack**
 
-### Development
+- React
+- React Router v7
+- Tailwind CSS
+- Tanstack Virtualize
+- Shadcn components (based on Radix UI)
 
-Start the development server with HMR:
+### Initial Design Draft
 
-```bash
-npm run dev
-```
+![image.png](https://raw.githubusercontent.com/shyamlohar/fluffy-memory/refs/heads/main/image.png)
 
-Your application will be available at `http://localhost:5173`.
+## Design Principles
 
-## Building for Production
+- **Familiar by default**
+    
+    UI patterns align with existing data tools to reduce cognitive load.
+    
+- **Optimized for repeat workflows**
+    
+    Saved queries, tabs, and shortcuts support users who run the same queries multiple times a day.
+    
+- **Keyboard-first experience**
+    
+    Power users can perform most actions without leaving the keyboard.
+    
+- **State persistence**
+    
+    Active tabs and queries are preserved across reloads so users can continue where they left off.
+    
 
-Create a production build:
+### **Rationale behind decisions**
 
-```bash
-npm run build
-```
+I want to keep UI/UX close to other tools that people are comfortable with or already use so they don’t have to learn entirely new thing and then get used to it. 
 
-## Deployment
+Tabs would help users quickly move between different queries, rather than having only one active query at a time, there could be a use case like where they want to compare data of two different queries or look at data of two different queries. 
 
-### Docker Deployment
+Sidebar for saved queries would help them quickly access the most used queries. some analysts could have use cases where they have to run some queries multiple times a day. having to write these queries every time would be a cumbersome task this would help them save time on it. 
 
-To build and run using Docker:
+People using this tool extensively would prefer to have keyboard shortcuts for basic things for a good UX and i have kept shortcuts which are intuitive and user can always access these shortcuts using shortcuts floating button to learn about shortcuts and become a power user of a tool. 
 
-```bash
-docker build -t my-app .
+Prefill the Query names to improve the UX in case user does not wish to write query name specifically. and if they wish to it should not require manual focus and text changes.
 
-# Run the container
-docker run -p 3000:3000 my-app
-```
+Data Persistance: Preserve the active tabs across reloads / tab closures so user’s can continue from where they had left off.  
 
-The containerized application can be deployed to any platform that supports Docker, including:
+Scope  
 
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
+- Sidebar listing all saved queries
+- Tabs to create new Queries
+- Tabs to quickly switch between queries
+- Save Queries
+- Delete Queries
+- Run Queries and Cancel running Queries
+- Shortcuts for various actions
+- Virtualization of queries data
+- Search Queries
+- Query execution times
 
-### DIY Deployment
+Things that i haven’t covered as part of this implementation: 
 
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
+- Syntax highlighting
+- Query validations
+- DB explorer
+- Query result caching limit
+- Usage of different data for different queries
+- Pinning Tabs / Queries
 
-Make sure to deploy the output of `npm run build`
+**Page load metrics as per** [https://pagespeed.web.dev/](https://pagespeed.web.dev/) **:**
 
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
+First Contentful Paint: 0.7s
 
-## Styling
+Largest Contentful Paint: 0.7 s
 
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+Total Blocking Time: 0 ms
 
----
+Cumulative Layout Shift: 0 ms 
 
-Built with ❤️ using React Router.
+Test was run on [https://pagespeed.web.dev/](https://pagespeed.web.dev/) to ensure benchmark environment isn’t changing depending on state of machine. 
+
+Optimisations done to improve performance: 
+
+- Lazy load CSV when query is ran instead of loading dummy data at load time
+- Virtualizations of table data for improving page performance when there is huge amount of data
+
+
+### How to run this project locally 
+
+1. Ensure bun runtime is installed 
+2. run `bun install`
+3. run `bun dev`
+
