@@ -234,7 +234,7 @@ function QueryRunnerRunButton({ children, ...props }: ComponentProps<typeof Butt
     <Button
       onClick={isRunning ? cancel : run}
       variant={isRunning ? "destructive" : props.variant}
-      disabled={props.disabled ?? (!hasQuery || isRunning)}
+      disabled={props.disabled ?? !hasQuery}
       {...props}
     >
       {isRunning ? <Pause /> : <PlayIcon />}
