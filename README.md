@@ -4,6 +4,8 @@ Walkthrough video:
 
 [https://www.loom.com/share/5d6a972e563940ca9cf28552f2ebe08e](https://www.loom.com/share/5d6a972e563940ca9cf28552f2ebe08e)
 
+Demo URL: [Demo](https://fluffy-memory-plum.vercel.app/)
+
 ## Problem Statement & Design Rationale
 
 ### Functional Requirements
